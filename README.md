@@ -1,12 +1,18 @@
 # FastAPI LLM Test Generator
 ---
-*fastapi_llm_test_generator* is an open-source tool that simplifies pytest creation for FastAPI projects leveraging LLMs. 
+*fastapi_llm_test_generator* is a tool that simplifies pytest creation for FastAPI projects leveraging LLMs. 
 
 
 ---
 ## Description
 
-It automatically iterates over each FastAPI endpoint, analyzes the associated codebase for relevant context (including Pydantic models, function calls, and database tables), and uses a language model to generate corresponding test functions. With this tool, you can quickly generate robust test cases tailored to your API endpoints, streamlining the testing process. that to an LLM to create test functions used with pytest.
+It automatically iterates over each FastAPI endpoint, analyzes the associated codebase for relevant context (including Pydantic models, function calls, and database tables), and uses a large language model to generate corresponding test functions. With this tool, you can quickly generate robust test cases tailored to your API endpoints, streamlining the testing process. that to an LLM to create test functions used with pytest.
+
+# Requirements
+
+* fastapi app
+* Anthropic API key
+
 
 
 # Usage
@@ -79,3 +85,5 @@ and then run `python -m fastapi_llm_test_generator generate . anthropic --config
 
 * Run agent multiple times to make sure tests are correct
 * Tests for this package :)
+* openai support
+* different databases
