@@ -6,7 +6,11 @@
 ---
 ## Description
 
-It automatically iterates over each FastAPI endpoint, analyzes the associated codebase for relevant context (including Pydantic models, function calls, and database tables), and uses a large language model to generate corresponding test functions. With this tool, you can quickly generate robust test cases tailored to your API endpoints, streamlining the testing process. that to an LLM to create test functions used with pytest.
+It automatically iterates over each FastAPI endpoint, analyzes the associated codebase for relevant context (including Pydantic models, function calls, and database tables), and uses a large language model to generate corresponding test functions. With this tool, you can quickly generate test cases tailored to your API endpoints, streamlining the testing process
+
+# Disclaimer
+
+This won't solve all your problems, yet. It generates tests based on your app context. It works best for simple enough use cases. Tests are there to test your application, make sure to read the generated tests and think about whether they make sense. Treat these as a starting point.
 
 # Requirements
 
@@ -79,6 +83,7 @@ As a convenience *fastapi_llm_test_generator* can readin a `config.json` to make
 
 and then run `python -m fastapi_llm_test_generator generate . anthropic --config-file scripts/test_gen_config.json`
 
+tests will be generated in a directory called `test` in your `source_app_directory` with subfolders resembling the api endpoints path.
 
 
 # Future
