@@ -4,6 +4,8 @@ from typing import Any, Callable, Union
 class BaseDBPlugin:
     def __init__(self, db_url: str, isAsync: bool = False):
         super().__init__()
+        if db_url is None or db_url == "":
+            raise Exception("Please provide a database url")
         self.db_url = db_url
         self.isAsync = isAsync
 

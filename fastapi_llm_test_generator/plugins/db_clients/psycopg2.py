@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Psycopg2DBPlugin(BaseDBPlugin):
-    def __init__(self, db_url, isAsync=False):
+    def __init__(self, db_url: str, isAsync=False):
         super().__init__(db_url, isAsync)
 
     def extract_table_names(self, source_code: Union[str, Callable]) -> list[Any]:

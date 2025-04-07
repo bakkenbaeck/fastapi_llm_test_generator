@@ -1,1 +1,1 @@
-from .walk_ast import generate
+from .walk_ast import FastAPILLMTestGenerator

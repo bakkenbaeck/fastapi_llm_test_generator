@@ -1,2 +1,2 @@
-from .main import generate
+from .main import FastAPILLMTestGenerator
 from .walker import walker

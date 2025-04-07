@@ -13,7 +13,7 @@ from fastapi_llm_test_generator.plugins.db_clients import (
     async_use_db_plugin,
     use_db_plugin,
 )
-from fastapi_llm_test_generator.schemas import Walker
+from fastapi_llm_test_generator.schemas import CodeResponse, Walker
 
 from .fastapi_functions import (
     find_fastapi_app,
@@ -193,7 +193,7 @@ def walker(
     prompt_type: str = None,
     overwrite: bool = False,
     run_tests: bool = False,
-) -> list[Walker]:
+) -> list[tuple[Walker, CodeResponse]]:
     app_file_path, app_function_name, app_instance = find_fastapi_app(
         source_app_directory
     )
@@ -212,7 +212,7 @@ def walker(
     else:
         app = module.app
 
-    logger.info("Generating tests")
+    logger.info("Start generating tests")
 
     filtered_routes = [
         route
@@ -300,7 +300,7 @@ def walker(
 
         with open(file_name, "w") as f:
             f.write(response.content)
-        logger.debug(f"Writing file: {file_name}")
+        logger.debug(f"Writing test to file: {file_name}")
         # 6. potentially run tests
 
         if run_tests:

@@ -5,12 +5,13 @@ from typing import Union
 
 import typer
 from catalogue import Registry
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from typer.main import get_command
 from typing_extensions import Annotated
 
 from .logging import setup_logging
 from .plugins import ai_clients_registry, db_clients_registry
-from .walk_ast import main
+from .walk_ast import FastAPILLMTestGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ def generate(
         typer.Argument(
             help="Path to the tests app directory if none provided it will be create at source_app_directory/tests"
         ),
-    ] = "tests",
+    ] = Path("./tests"),
     db_plugin: Annotated[
         Union[str, None],
         typer.Option(help="Optional database plugin to enable DB integration"),
@@ -101,27 +102,31 @@ def generate(
     ] = False,
 ):
     config = {}
-    if config_file and config_file.exists():
+
+    if config_file and config_file.is_file():
         config = json.loads(config_file.read_text())
 
-    db_plugin = db_plugin or config.get("db_plugin")
-    function_name = function_name or config.get("function_name")
-    route_path = route_path or config.get("route_path")
-    db_url = db_url or config.get("db_url")
+    db_plugin = db_plugin or config.get("db_plugin", None)
+
+    function_name = function_name or config.get("function_name", None)
+    route_path = route_path or config.get("route_path", None)
+    db_url = db_url or config.get("db_url", None)
     api_key = api_key or config.get("api_key")
-    model = model or config.get("model")
-    additional_prompt_pre = additional_prompt_pre or config.get("additional_prompt_pre")
+    model = model or config.get("model", None)
+    additional_prompt_pre = additional_prompt_pre or config.get(
+        "additional_prompt_pre", None
+    )
     additional_prompt_info = additional_prompt_info or config.get(
-        "additional_prompt_info"
+        "additional_prompt_info", None
     )
-    mock_prompt = mock_prompt or config.get("mock_prompt")
-    fixtures_prompt = fixtures_prompt or config.get("fixtures_prompt")
+    mock_prompt = mock_prompt or config.get("mock_prompt", None)
+    fixtures_prompt = fixtures_prompt or config.get("fixtures_prompt", None)
     additional_prompt_after = additional_prompt_after or config.get(
-        "additional_prompt_after"
+        "additional_prompt_after", None
     )
-    prompt_type = prompt_type or config.get("prompt_type")
-    overwrite = overwrite or config.get("overwrite")
-    run_tests = run_tests or config.get("run_tests")
+    prompt_type = prompt_type or config.get("prompt_type", None)
+    overwrite = overwrite or config.get("overwrite", False)
+    run_tests = run_tests or config.get("run_tests", False)
 
     db_plugin_instance = None
     if db_plugin:
@@ -137,23 +142,29 @@ def generate(
         raise typer.Exit(1)
     ai_client_plugin_instance = ai_client_plugin_func(api_key, model)
 
-    return main(
+    generator = FastAPILLMTestGenerator(
         source_app_directory,
         ai_client_plugin_instance,
         test_directory,
-        function_name=function_name,
-        route_path=route_path,
-        db_plugin_instance=db_plugin_instance,
-        ai_client_plugin_instance=ai_client_plugin_instance,
-        additional_prompt_pre=additional_prompt_pre,
-        additional_prompt_info=additional_prompt_info,
-        mock_prompt=mock_prompt,
-        fixtures_prompt=fixtures_prompt,
-        additional_prompt_after=additional_prompt_after,
-        prompt_type=prompt_type,
-        overwrite=overwrite,
-        run_tests=run_tests,
+        db_plugin_instance,
+        function_name,
+        route_path,
+        additional_prompt_pre,
+        additional_prompt_info,
+        mock_prompt,
+        fixtures_prompt,
+        additional_prompt_after,
+        prompt_type,
+        overwrite,
+        run_tests,
     )
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        progress.add_task(description="Generating...", total=None)
+        return generator()
 
 
 @app.callback()

@@ -13,9 +13,13 @@ logger = logging.getLogger(__name__)
 
 class AnthropicClient:
     def __init__(self, ANTHROPIC_API_KEY: str, model: str = None):
+        if ANTHROPIC_API_KEY is None or ANTHROPIC_API_KEY == "":
+            raise Exception("Please provide an API KEY")
+
         self.client = Anthropic(
             api_key=ANTHROPIC_API_KEY,
         )
+
         if model is None:
             model = "claude-3-5-sonnet-latest"
         self.model = model
