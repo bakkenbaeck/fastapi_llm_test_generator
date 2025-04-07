@@ -84,6 +84,8 @@ def is_user_defined(func_obj: Callable) -> bool:
     ]:
         return False
 
+    module = sys.modules.get(module_name)
+
     if "site-packages" in module.__file__:
         return False
 
@@ -94,10 +96,9 @@ def is_user_defined(func_obj: Callable) -> bool:
         return False
 
     # Standard library and installed packages are in sys.modules but have __file__ attributes
-    module = sys.modules.get(module_name)
     if module and hasattr(module, "__file__"):
         cls = getattr(func_obj, "__qualname__", "").split(".")[0]
-        if cls in func_obj.__globals__:
+        if hasattr(func_obj, "__globals__") and cls in func_obj.__globals__:
             cls_obj = func_obj.__globals__[cls]
             if inspect.isclass(cls_obj) and issubclass(cls_obj, BaseModel):
                 return False  # Exclude Pydantic models
@@ -140,8 +141,10 @@ def walk_tree(func: Callable, visited=None) -> dict[str, Callable]:
                     else:
                         # external functions
                         pass
-            except Exception:
-                pass  # Ignore if function is built-in or unavailable
+            except Exception as e:
+                #logger.debug(f"{e}")
+                raise e
+                pass  # Ignore if function is built-in or unavailable TODO: do this better
 
             self.generic_visit(node)
 
