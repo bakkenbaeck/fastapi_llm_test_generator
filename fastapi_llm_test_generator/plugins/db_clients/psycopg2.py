@@ -8,6 +8,11 @@ from .base import BaseDBPlugin
 SQL_TABLE_REGEX = r"\b(?:FROM|JOIN|INTO|UPDATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*\()"
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class Psycopg2DBPlugin(BaseDBPlugin):
     def __init__(self, db_url, isAsync=False):
         super().__init__(db_url, isAsync)
@@ -93,7 +98,7 @@ class Psycopg2DBPlugin(BaseDBPlugin):
             return columns, constraints, indexes
 
         except Exception as e:
-            print("Could not setup database. Is psycopg2 installed ?")
+            logger.warning(f"Could not setup database. Is psycopg2 installed ?: {e}")
             raise e
 
 

@@ -269,10 +269,11 @@ wheels = [
 
 [[package]]
 name = "llm-test-generator-tool"
-version = "0.1.0"
-source = { virtual = "." }
+version = "0.0.1"
+source = { editable = "." }
 dependencies = [
     { name = "catalogue" },
+    { name = "pydantic" },
     { name = "rich-toolkit" },
     { name = "typer" },
 ]
@@ -292,6 +293,7 @@ psycopg2 = [
 [package.metadata]
 requires-dist = [
     { name = "catalogue", specifier = ">=2.0.10" },
+    { name = "pydantic", specifier = ">=2.11.0" },
     { name = "rich-toolkit", specifier = ">=0.14.1" },
     { name = "typer", specifier = ">=0.15.2" },
 ]

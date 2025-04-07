@@ -9,8 +9,8 @@ from typer.main import get_command
 from typing_extensions import Annotated
 
 from .logging import setup_logging
-from .plugins import ai_clients_registry, db_clients_registry, load_plugin
-from .walk_ast import walker
+from .plugins import ai_clients_registry, db_clients_registry
+from .walk_ast import main
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +120,8 @@ def generate(
         "additional_prompt_after"
     )
     prompt_type = prompt_type or config.get("prompt_type")
+    overwrite = overwrite or config.get("overwrite")
+    run_tests = run_tests or config.get("run_tests")
 
     db_plugin_instance = None
     if db_plugin:
@@ -135,8 +137,9 @@ def generate(
         raise typer.Exit(1)
     ai_client_plugin_instance = ai_client_plugin_func(api_key, model)
 
-    routes = walker(
+    return main(
         source_app_directory,
+        ai_client_plugin_instance,
         test_directory,
         function_name=function_name,
         route_path=route_path,
@@ -151,8 +154,6 @@ def generate(
         overwrite=overwrite,
         run_tests=run_tests,
     )
-
-    return routes
 
 
 @app.callback()

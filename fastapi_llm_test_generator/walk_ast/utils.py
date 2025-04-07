@@ -15,7 +15,6 @@ def run_test(test_file, test_type: str, test_env: str = None):
         env=test_env,
     )
 
-    logger.info(result.stdout)  # Print pytest output
-
+    logger.info(result.stdout)
     if result.returncode != 0:
         logger.warning("Tests failed or encountered errors.")

@@ -1,11 +1,14 @@
 import ast
 import importlib
+import logging
 import os
 import sys
 from pathlib import Path
 from typing import Union
 
 import typer
+
+logger = logging.getLogger(__name__)
 
 
 def load_fastapi_app(module, function_name: str):
@@ -55,11 +58,22 @@ def find_fastapi_app(directory: str) -> Union[Path, None]:
                                     stmt.value, ast.Name
                                 ):
                                     if stmt.value.id == fastapi_instance:
-                                        return file_path, node.name
+                                        return file_path, node.name, None
                                 # TODO find other ways e.g. plain old app = FastAPI and also adjust walktree
+
+                        elif isinstance(node, ast.Assign):
+                            if isinstance(node.value, ast.Call) and isinstance(
+                                node.value.func, ast.Name
+                            ):
+                                if node.value.func.id == "FastAPI":
+                                    fastapi_instance = node.targets[
+                                        0
+                                    ].id  # Capture the FastAPI instance
+                                    return file_path, None, fastapi_instance
+
                 except Exception as e:
-                    print(f"Skipping {file_path}: {e}")
-    return None
+                    logger.debug(f"Skipping {file_path}: {e}")
+    return None, None, None
 
 
 if __name__ == "__main__":

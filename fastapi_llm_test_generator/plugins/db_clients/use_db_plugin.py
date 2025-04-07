@@ -11,7 +11,6 @@ def use_db_plugin(plugin_instance, route: Walker) -> Walker:
 
     if route.function_calls:
         for name, func in route.function_calls.items():
-            print("=>", func)
             try:
                 func_source_code = inspect.getsource(func)
             except Exception as e:

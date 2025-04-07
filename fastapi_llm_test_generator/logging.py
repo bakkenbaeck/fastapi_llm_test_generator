@@ -20,7 +20,5 @@ def setup_logging(
     )
     rich_handler.setFormatter(logging.Formatter("%(message)s"))
     logger.addHandler(rich_handler)
-
-    print(level)
     logger.setLevel(level)
     logger.propagate = False

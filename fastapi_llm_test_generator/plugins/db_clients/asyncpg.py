@@ -10,6 +10,10 @@ import typer
 
 app = typer.Typer()
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AsyncpgDBPlugin(BaseDBPlugin):
     def __init__(self, db_url, isAsync=True):
@@ -75,7 +79,7 @@ class AsyncpgDBPlugin(BaseDBPlugin):
                 return columns, constraints, indexes
 
         except Exception as e:
-            print("Could not setup database. Is asyncpg installed ?")
+            logger.warning(f"Could not setup database. Is asyncpg installed ?: {e}")
             raise e
 
 

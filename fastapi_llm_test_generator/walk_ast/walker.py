@@ -9,7 +9,10 @@ from typing import Callable
 from pydantic import BaseModel
 
 from fastapi_llm_test_generator.llm import make_prompt
-from fastapi_llm_test_generator.plugins.db_clients import async_use_db_plugin, use_db_plugin
+from fastapi_llm_test_generator.plugins.db_clients import (
+    async_use_db_plugin,
+    use_db_plugin,
+)
 from fastapi_llm_test_generator.schemas import Walker
 
 from .fastapi_functions import (
@@ -131,7 +134,6 @@ def walk_tree(func: Callable, visited=None) -> dict[str, Callable]:
                 func_obj = eval(func_name, func.__globals__)  # Get function object
                 if callable(func_obj):
                     if is_user_defined(func_obj):
-                        print("is_user_defined", func_obj)
                         # "user" functions
                         function_calls[func_name] = func_obj
                         function_calls.update(walk_tree(func_obj, visited))
@@ -192,18 +194,24 @@ def walker(
     overwrite: bool = False,
     run_tests: bool = False,
 ) -> list[Walker]:
-    app_file_path, app_function_name = find_fastapi_app(source_app_directory)
+    app_file_path, app_function_name, app_instance = find_fastapi_app(
+        source_app_directory
+    )
     if not app_file_path:
         raise Exception("No FastAPI app found.")
 
     if db_plugin_instance and db_plugin_instance.isAsync:
         import asyncio
 
+    # try:
     module, spec = load_fastapi_module(app_file_path)
     routes = []
-    # try:
     spec.loader.exec_module(module)
-    app = load_fastapi_app(module, app_function_name)
+    if app_function_name:
+        app = load_fastapi_app(module, app_function_name)
+    else:
+        app = module.app
+
     logger.info("Generating tests")
 
     filtered_routes = [
@@ -218,6 +226,7 @@ def walker(
             )
             or (function_name and not route_path and route.name == function_name)
             or (not function_name and route_path and route_path in route.path)
+            or (not function_name and not route_path)
         )
         and not (
             "/openapi.json" in route.path
@@ -248,8 +257,6 @@ def walker(
             logger.info(f"Skipping test '{file_name}' already exists")
             continue
 
-        print(route)
-
         # 1. get all necessary codes, models, definitions
         res = inspect_fastapi_route(route)
 
@@ -270,7 +277,7 @@ def walker(
             fixtures_prompt=fixtures_prompt,
             url=route.path,
             pydantic_prompt="".join(
-                [inspect.getsource(r) for r in res.pydantic_models if print(r) is None]
+                [inspect.getsource(r) for r in res.pydantic_models if r]
             )
             if res.pydantic_models
             else None,
